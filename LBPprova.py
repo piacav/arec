@@ -2,6 +2,7 @@
 import cv2
 # To performing path manipulations
 import os
+from sklearn.model_selection import train_test_split as tts
 # Local Binary Pattern function
 from skimage.feature import local_binary_pattern
 # To calculate a normalized histogram
@@ -14,13 +15,38 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
+def split_dataset(dataset, train_size=0.70):
+    train_set = []
+    test_set = []
+    for person in dataset:
+        np.random.shuffle(person)
+        train_set.append(person[:round(len(person)*train_size)])
+        test_set.append(person[round(len(person)*train_size):])
+    return train_set, test_set
 
 # List for storing the LBP Histograms, address of images and the corresponding label
 X_test = []
 X_name = []
 #y_test = []
+dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images'
+dataset_dict = {}
 
-train_images = ['/Users/piacavasinni/Desktop/FGNET/images/001A19.jpg', '/Users/piacavasinni/Desktop/FGNET/images/001A43a.jpg']
+for n in range(1, 83):
+    dataset_dict[n] = []
+for file in os.listdir(dataset_path):
+    dataset_dict[int(file[:3])].append(file[:-4])
+
+train_set, test_set = []
+for v in dataset_dict.keys():
+    tr, ts = split_dataset()
+
+
+
+
+#x_train, y_train, x_test, y_test = tts()
+
+train_images = ['C:\\Users\\andry\\Desktop\\FGNET\\images\\001A19.jpg', 'C:\\Users\\andry\\Desktop\\FGNET\\images\\001A43a.jpg']
+#train_images = ['/Users/piacavasinni/Desktop/FGNET/images/001A19.jpg', '/Users/piacavasinni/Desktop/FGNET/images/001A43a.jpg']
 #train_images = ['/Users/piacavasinni/Desktop/FotoDB/grigios.png','/Users/piacavasinni/Desktop/FotoDB/lightgry.jpg']
 # For each image in the training set calculate the LBP histogram
 # and update X_test, X_name and y_test
@@ -33,14 +59,16 @@ for train_image in train_images:
     # Number of points to be considered as neighbourers
     no_points = 8 * radius
     # Uniform LBP is used
-    lbp = local_binary_pattern(im_gray, no_points, radius)
+    lbp = local_binary_pattern(im_gray, no_points, radius, method='uniform')
     plt.imshow(lbp, cmap='gray')
     plt.show()
     # Calculate the histogram
     x = np.unique(lbp.ravel())
     # Normalize the histogram
     hist = x/sum(x)
+    print(lbp.ravel())
     print(hist)
+
     plt.hist(lbp.ravel(), 256, [0, 256])
     plt.title(train_image)
     plt.show()
