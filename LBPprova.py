@@ -17,6 +17,7 @@ import cvutils
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+from sys import platform
 '''
 # List for storing the LBP Histograms, address of images and the corresponding label
 X_test = []
@@ -52,8 +53,12 @@ def split_dataset(dataset, train_size=0.70):
         test_set.append(v[round(len(v)*train_size):])
     return train_set, test_set
 
-dataset_path = '/Users/piacavasinni/Desktop/FGNET/images'
-#dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images'
+if platform == 'win32':
+    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+elif platform == 'darwin':
+    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
+else:
+    dataset_path = ''
 
 dataset_dict = {}
 
@@ -69,7 +74,7 @@ tr, ts = split_dataset(dataset_dict)
 train_images = []
 for t in tr:
     for e in t:
-        train_images += (['/Users/piacavasinni/Desktop/FGNET/images/' + e + '.jpg'])
+        train_images += ([dataset_path + e + '.jpg'])
 
 #train_images = []
 #train_images = ['/Users/piacavasinni/Desktop/FGNET/images/001A19.jpg'], '/Users/piacavasinni/Desktop/FGNET/images/001A43a.jpg']
