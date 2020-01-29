@@ -46,10 +46,10 @@ def resizeImage(image):
 def split_dataset(dataset, train_size=0.70):
     train_set = []
     test_set = []
-    for person in dataset:
-        np.random.shuffle(person)
-        train_set.append(person[:round(len(person)*train_size)])
-        test_set.append(person[round(len(person)*train_size):])
+    for v in dataset.values():
+        np.random.shuffle(v)
+        train_set.append(v[:round(len(v)*train_size)])
+        test_set.append(v[round(len(v)*train_size):])
     return train_set, test_set
 
 dataset_path = '/Users/piacavasinni/Desktop/FGNET/images'
@@ -65,13 +65,16 @@ for file in os.listdir(dataset_path):
         dataset_dict[persona].append(file[:-4])
 
 ts, tr = [], []
-for v in dataset_dict.values():
-    print(v)
-    tr, ts = split_dataset(v)
-
+tr, ts = split_dataset(dataset_dict)
 train_images = []
+for t in tr:
+    for e in t:
+        train_images += (['/Users/piacavasinni/Desktop/FGNET/images/' + e + '.jpg'])
+
+#train_images = []
 #train_images = ['/Users/piacavasinni/Desktop/FGNET/images/001A19.jpg'], '/Users/piacavasinni/Desktop/FGNET/images/001A43a.jpg']
 #train_images = ['/Users/piacavasinni/Desktop/FotoDB/grigios.png','/Users/piacavasinni/Desktop/FotoDB/lightgry.jpg']
+
 # For each image in the training set calculate the LBP histogram
 # and update X_test, X_name and y_test
 for train_image in train_images:
