@@ -1,23 +1,12 @@
-# OpenCV bindings
-import cv2
-# To performing path manipulations
+
 import os
-# Local Binary Pattern function
-from skimage.feature import local_binary_pattern
-# Classifier
-from sklearn.svm import LinearSVC
-# to save and load, the model that is created from the classification
-from sklearn.externals import joblib
-# To calculate a normalized histogram
-from scipy.stats import itemfreq
-from sklearn.preprocessing import normalize
-# Utility package -- use pip install cvutils to install
-import cvutils
-# To read class from file
-import csv
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from sys import platform
+from skimage.feature import local_binary_pattern
+
 '''
 # List for storing the LBP Histograms, address of images and the corresponding label
 X_test = []
@@ -34,7 +23,6 @@ plt.xlabel("LBP pixel bucket")
 
 def resizeImage(image):
     (h, w) = image.shape[:2]
-
     width = 360  #  This "width" is the width of the resize`ed image
     # calculate the ratio of the width and construct the
     # dimensions
@@ -76,17 +64,18 @@ for t in tr:
     for e in t:
         train_images += ([dataset_path + e + '.jpg'])
 
-#train_images = []
-#train_images = ['/Users/piacavasinni/Desktop/FGNET/images/001A19.jpg'], '/Users/piacavasinni/Desktop/FGNET/images/001A43a.jpg']
-#train_images = ['/Users/piacavasinni/Desktop/FotoDB/grigios.png','/Users/piacavasinni/Desktop/FotoDB/lightgry.jpg']
-
 # For each image in the training set calculate the LBP histogram
 # and update X_test, X_name and y_test
 for train_image in train_images:
     # Read the image
     im = cv2.imread(train_image)
+    # Resize the image
+    im_res = resizeImage(im)
+    (h, w) = im.shape[:2]
+    cellSize = h / 10
+
     # Convert to grayscale as LBP works on grayscale image
-    im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    im_gray = cv2.cvtColor(im_res, cv2.COLOR_BGR2GRAY)
     cv2.imshow("Image", im_gray)
     cv2.waitKey(0)
 
@@ -105,22 +94,67 @@ for train_image in train_images:
     fig.savefig('temp.png', dpi=fig.dpi)
     plt.show()
     cv2.destroyAllWindows()
-    '''
+
     # Calculate the histogram
     x = np.unique(lbp.ravel())
-   
+
     # Normalize the histogram
     hist = x / sum(x)
-    min = lbp.min()
-    max = lbp.max()
-    print(x.round(decimals=6), min, max)
     hist = hist.reshape(1, -1)
-    print(lbp.ravel())
-    print(hist)
-    # Append image path in X_name
-    X_name.append(train_image)
-    # Append histogram to X_name
-    X_test.append(hist)
+
+    def extractHistogramList(image, label):
+
+        # get the descriptor class initiated
+        histogramList = []
+        LabelList = []
+
+        # This mask has the same width and height a the original image and has a default value of 0 (black).
+        maskedImage = np.zeros(image.shape[:2], dtype="uint8")
+        ########### create imageROIList here ############
+
+        (h, w) = image.shape[:2]
+
+        # Divide the image into 100 pieces
+        cellSizeYdir = h / 10
+        cellSizeXdir = w / 10
+
+        # start in origo
+        x = 0
+        y = 0
+        counterInt = 0
+
+        # 10*10 = 100
+        for i in range(10):
+
+            # update this value
+            y = cellSizeYdir * (i)
+
+            x = 0  # it starts at 0 for a new row
+            for j in range(10):
+                print ("[x] inspecting imageROI %d" % (counterInt))
+                counterInt = counterInt + 1
+
+                x = cellSizeXdir * (j)
+
+                imageROI = image[y: cellSizeYdir * (i + 1), x:cellSizeXdir * (j + 1)]
+
+                # print "ystart  " + str(y) + "  yjump  " + str((cellSizeYdir * (i+1)))
+                # print "xstart  " + str(x) +  "  xjump  " + str((cellSizeXdir * (j+1)))
+
+                # grayscale and calculate histogram
+                grayImageROI = cv2.cvtColor(imageROI, cv2.COLOR_BGR2GRAY)
+                hist = lbp.describe(grayImageROI)
+
+                histogramList.append(hist)
+                LabelList.append(label)
+
+        return histogramList, LabelList
+
+
+    histogramList, LabelList = extractHistogramList(im_gray, 'histo')
+
+    '''
+   
 
 nrows = 1
 ncols = 1
