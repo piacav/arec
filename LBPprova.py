@@ -30,7 +30,7 @@ def resizeImage(image):
     #resized = cv2.resize(image, dim, interpolation=cv2.INTER_CUBIC)
     return resized
 
-def split_dataset(dataset, train_size=0.70):
+def split_dataset(dataset, train_size=0.90):
     train_set = []
     test_set = []
     for v in dataset.values():
@@ -42,7 +42,7 @@ def split_dataset(dataset, train_size=0.70):
 if platform == 'win32':
     dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
 elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
+    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images3/'
 else:
     dataset_path = ''
 
@@ -50,6 +50,7 @@ dataset_dict = {}
 
 for n in range(1, 83):
     dataset_dict[n] = []
+
 for file in os.listdir(dataset_path):
     if not file.startswith('.'):
         persona = int(file[:3])
@@ -62,6 +63,7 @@ test_images = []
 for t in tr:
     for e in t:
         train_images += ([e])
+
 for tt in ts:
     for e in tt:
         test_images += ([e])
@@ -96,35 +98,26 @@ for e in train_images:
     #plt.show()
     #cv2.destroyAllWindows()
 
-    # Calculate the histogram
-    #x = np.unique(lbp.ravel())
-
-    (hist, _) = np.histogram(lbp.ravel(), bins=np.arange(0, no_points + 3), range=(0, radius + 2))
-
-    # Normalize the histogram
+    (hist, _) = np.histogram(lbp.ravel(),
+                             bins=np.arange(0, no_points + 3),
+                             range=(0, no_points + 2))
+    # normalize the histogram
     hist = hist.astype("float")
-    hist /= (hist.sum() + 1e-7 )
-
-    # 2th method
-    #hist = x / sum(x)
-    #hist = hist.reshape(1, -1)
+    hist /= (hist.sum() + 1e-7)
 
     labelList.append(e[:3])
     data.append(hist)
-    #print(labelList)
-    #print(data)
 
-model = LinearSVC(C=100.0, random_state=42)
-print(data)
-print(hist)
-print(labelList)
+model = LinearSVC(C=100.0, random_state=42, max_iter=100000)
+#print(data)
+#print(labelList)
 x = model.fit(data, labelList)
 joblib.dump(model, "lbp_model.pkl")
 
-
+sbagliati = 0
+indovinati = 0
 # loop over the testing images
 for i in test_images:
-    print(i)
     imagePath = dataset_path + i + '.jpg'
     # load the image, convert it to grayscale, describe it,
     # and classify it
@@ -141,9 +134,28 @@ for i in test_images:
     histt = histt.astype("float")
     histt /= (histt.sum() + 1e-7)
     prediction = model.predict(histt.reshape(1, -1))
+    score = model.decision_function(histt.reshape(1,-1))
+    print(i[:3])
+    print((prediction[0]))
+
+    if (int(i[:3])) == (int(prediction[0])):
+
+        indovinati += 1
+        cv2.putText(imagetest, prediction[0], (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+                    1.0, (0, 0, 255), 3)
+    else:
+        sbagliati += 1
+
 
     # display the image and the prediction
-    cv2.putText(imagetest, prediction[0], (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
-                1.0, (0, 0, 255), 3)
+    #cv2.putText(imagetest, prediction[0], (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+      #          1.0, (0, 0, 255), 3)
+    print(score)
     cv2.imshow("Image", imagetest)
     cv2.waitKey(0)
+
+
+print('INDOVINATI')
+print(indovinati)
+print('SBAGLIATI')
+print(sbagliati)
