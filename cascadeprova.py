@@ -49,7 +49,7 @@ for test_image in dataset_list:
 
     for (x, y, w, h) in faces_rect:
         cv2.rectangle(image_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        face_img = image_copy[y:y + h, h:h + w].copy()
+        face_img = image_copy[y:y + h, h:h + w]
         blob = cv2.dnn.blobFromImage(face_img, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
 
         # Predict Gender
