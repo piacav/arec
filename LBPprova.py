@@ -72,13 +72,16 @@ for e in train_images:
     # Read the image
     imagePath = dataset_path + e + '.jpg'
     im = cv2.imread(imagePath)
-    # Resize the image
-    im_res = resizeImage(im)
+    im = resizeImage(im)
     (h, w) = im.shape[:2]
-    cellSize = h / 10
+    cellSize = h/10
+    # Resize the image
+    #im_res = resizeImage(im)
+    #(h, w) = im.shape[:2]
+    #cellSize = h / 10
 
     # Convert to grayscale as LBP works on grayscale image
-    im_gray = cv2.cvtColor(im_res, cv2.COLOR_BGR2GRAY)
+    im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     #cv2.imshow("Image", im_gray)
     #cv2.waitKey(0)
 
@@ -122,6 +125,9 @@ for i in test_images:
     # load the image, convert it to grayscale, describe it,
     # and classify it
     imagetest = cv2.imread(imagePath)
+    imagetest = resizeImage(imagetest)
+    (h, w) = imagetest.shape[:2]
+    cellSize = h / 10
     graytest = cv2.cvtColor(imagetest, cv2.COLOR_BGR2GRAY)
 
     radius = 5
@@ -133,10 +139,12 @@ for i in test_images:
     # Normalize the histogram
     histt = histt.astype("float")
     histt /= (histt.sum() + 1e-7)
-    prediction = model.predict(histt.reshape(1, -1))
-    score = model.decision_function(histt.reshape(1,-1))
-    print(i[:3])
-    print((prediction[0]))
+    histNew = np.reshape(histt, (1, len(histt)))
+    prediction = model.predict(histNew)
+    score = model.decision_function(histNew)
+    #prediction = model.predict(histt.reshape(1, -1))
+    #score = model.decision_function(histt.reshape(1,-1))
+
 
     if (int(i[:3])) == (int(prediction[0])):
 
