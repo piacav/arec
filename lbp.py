@@ -1,4 +1,3 @@
-
 import os
 from sklearn.svm import LinearSVC
 import cv2
