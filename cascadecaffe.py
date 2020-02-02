@@ -111,6 +111,8 @@ for test_image in dataset_list:
         real_class = classes.get(classifier_age(int(real_age)))
         print("Real Class: " + real_class)
 
+        print("Score Age : " + str(age_preds[0]))
+        print("Score Gen : " + str(gender_preds[0]))
         print('#######################')
 
         # Verification
