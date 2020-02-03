@@ -236,7 +236,7 @@ for i in test_images:
     # Predict image
     prediction = model.predict(histNew)
 
-    real_age = i[:3]
+    real_age = i[4:6]
     print("Real Age  : " + real_age)
 
     classdet = prediction[0]
@@ -245,8 +245,7 @@ for i in test_images:
     real_class = classes.get(classifier_age(int(real_age)))
     print("Real Class: " + real_class)
 
-
-    score = model.decision_function(histNew)
+    score = model.decision_function(histNew)[0]
     print("Score     : " + str(score))
 
     print('#######################')
@@ -262,6 +261,6 @@ for i in test_images:
     #cv2.waitKey(0)
 
 
-print('INDOVINATI: ' + str(indovinati))
-print('SBAGLIATI: ' + str(sbagliati))
-print('TOTALI: ' + str(indovinati + sbagliati))
+print('INDOVINATI : ' + str(indovinati))
+print('SBAGLIATI  : ' + str(sbagliati))
+print('TOTALI     : ' + str(indovinati + sbagliati))
