@@ -17,7 +17,7 @@ indovinati = 0
 dataset_list = []
 
 # Specify the Haar classifier
-cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt2.xml')
+cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
 
 # Specify font used for plotting
 font = cv2.FONT_HERSHEY_SIMPLEX

@@ -124,6 +124,8 @@ for i in test_images:
     # load the image, convert it to grayscale, describe it,
     # and classify it
     imagetest = cv2.imread(imagePath)
+
+
     imagetest = resizeImage(imagetest)
     (h, w) = imagetest.shape[:2]
     cellSize = h / 10
@@ -160,7 +162,6 @@ for i in test_images:
     print(score)
     cv2.imshow("Image", imagetest)
     cv2.waitKey(0)
-
 
 print('INDOVINATI')
 print(indovinati)
