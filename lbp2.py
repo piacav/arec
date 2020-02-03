@@ -235,11 +235,23 @@ for i in test_images:
 
     # Predict image
     prediction = model.predict(histNew)
-    score = model.decision_function(histNew)
-    print(prediction[0])
-    # print(score)
 
-    if (classes.get(classifier_age(int(i[:3])))) == (prediction[0]):
+    real_age = i[:3]
+    print("Real Age  : " + real_age)
+
+    classdet = prediction[0]
+    print("Class     : " + classdet)
+
+    real_class = classes.get(classifier_age(int(real_age)))
+    print("Real Class: " + real_class)
+
+
+    score = model.decision_function(histNew)
+    print("Score     : " + str(score))
+
+    print('#######################')
+
+    if real_class == classdet:
            indovinati += 1
     else:
         sbagliati += 1

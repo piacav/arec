@@ -127,7 +127,6 @@ for test_image in dataset_list:
         #cv2.imshow('image', image_copy)
         #cv2.waitKey(0)
 
-print('INDOVINATI')
-print(indovinati)
-print('SBAGLIATI')
-print(sbagliati)
+print('INDOVINATI: ' + str(indovinati))
+print('SBAGLIATI: ' + str(sbagliati))
+print('TOTALI: ' + str(indovinati + sbagliati))
