@@ -13,7 +13,6 @@ sbagliati = 0
 indovinati = 0
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
 age_class = [14, 24, 59, 100]
-age_list = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 classes = {1: "Young",
             2: "Teen",
             3: "Adult",
@@ -64,7 +63,7 @@ def resizeImage(image):
     return resized
 
 # Function to do random split between training set and test set
-def split_dataset(dataset, train_size=0.70):
+def split_dataset(dataset, train_size=0.85):
     train_set = []
     test_set = []
     for v in dataset.values():
@@ -95,7 +94,8 @@ def classifier_age(age):
         return 2
     elif age <= age_class[2]:
         return 3
-    return 4
+    else:
+        return 4
 
 tr, ts = split_dataset(dataset_dict)
 
@@ -109,7 +109,7 @@ for tt in ts:
 
 # __________________________________________________ TRAIN _____________________________________________________________
 
-print('START TREINING')
+print('START TRAINING')
 
 for e in train_images:
 
@@ -236,8 +236,8 @@ for i in test_images:
     # Predict image
     prediction = model.predict(histNew)
 
-    real_age = i[4:6]
-    print("Real Age  : " + real_age)
+    real_age = int(i[4:6])
+    print("Real Age  : " + str(real_age))
 
     classdet = prediction[0]
     print("Class     : " + classdet)
