@@ -1,7 +1,7 @@
 from typing import List, Union
-import cv2
-import os
 from sys import platform
+
+import cv2
 
 # Initialization variables
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
@@ -14,28 +14,20 @@ classes = {1: "Young",
             4: "Old", }
 sbagliati = 0
 indovinati = 0
-dataset_list = []
-
+test_images = []
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
 
 # Specify font used for plotting
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-# Create dataset path and list
+# Creation dataset path for different O.S.
 if platform == 'win32':
-    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    dataset_path = 'D:\\FGNET\\images\\'
+    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
     dataset_path = ''
-
-for file in os.listdir(dataset_path):
-    if not file.startswith('.'):
-        persona = int(file[:3])
-        dataset_list.append(file[:-4])
-
 
 # Function to calculate the class of age
 def classifier_age(age):
@@ -60,7 +52,11 @@ def load_caffe_models():
     return (age_net, gender_net)
 
 
-for test_image in dataset_list:
+test_file = open("test_set.txt", "r")
+for i in test_file:
+    test_images.append(i.rstrip())
+
+for test_image in test_images:
 
     # Load a model
     age_net, gender_net = load_caffe_models()
@@ -81,6 +77,7 @@ for test_image in dataset_list:
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
 
     for (x, y, w, h) in faces_rect:
+
         # Create rectangle on image
         cv2.rectangle(image_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
         face_img = image_copy[y:y + h, h:h + w]
@@ -92,30 +89,31 @@ for test_image in dataset_list:
         gender_net.setInput(blob)
         gender_preds = gender_net.forward()
         gender = gender_list[gender_preds[0].argmax()]
-        print("Gender    : " + gender)
+        #print("Gender    : " + gender)
 
         # Predict Age
         age_net.setInput(blob)
         age_preds = age_net.forward()
         age: Union[str, List[str]] = age_list[age_preds[0].argmax()]
-        print("Age Range : " + age)
+        #print("Age Range : " + age)
 
         # Define class
         classdet = classes.get(classifier_age(age))
-        print("Class     : " + classdet)
+        #print("Class     : " + classdet)
 
         # Define real age and class
         real_age = test_image[4:6]
-        print("Real Age  : " + real_age)
+        #print("Real Age  : " + real_age)
 
         real_class = classes.get(classifier_age(int(real_age)))
-        print("Real Class: " + real_class)
+        #print("Real Class: " + real_class)
 
-        print("Score Age : " + str(age_preds[0]))
-        print("Score Gen : " + str(gender_preds[0]))
-        print('#######################')
+        #print("Score Age : " + str(age_preds[0]))
+        #print("Score Gen : " + str(gender_preds[0]))
+        #print('#######################')
 
         # Verification
+        l = len(test_images)
         if classdet == real_class:
             indovinati += 1
         else:

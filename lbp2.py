@@ -1,14 +1,9 @@
-import os
-from sklearn.svm import LinearSVC
-from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import accuracy_score as acsc
-from sklearn.metrics import classification_report as cr
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 from sys import platform
+
+import cv2
+import numpy as np
 from skimage.feature import local_binary_pattern
-from sklearn.externals import joblib
+from sklearn.svm import LinearSVC
 
 # Inizialization variables
 sbagliati = 0
@@ -83,12 +78,10 @@ def classifier_age(age):
 train_file = open("train_set.txt", "r")
 for i in train_file:
     train_images.append(i.rstrip())
-train_images = train_images[:-1]
 
 test_file = open("test_set.txt", "r")
 for i in test_file:
     test_images.append(i.rstrip())
-test_images = train_images[:-1]
 
 # __________________________________________________ TRAIN _____________________________________________________________
 
