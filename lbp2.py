@@ -184,8 +184,8 @@ for i in test_images:
     cellSize = h / 10
 
     # Plot gray image and wait
-    #cv2.imshow("Image", im)
-    #cv2.waitKey(0)
+    cv2.imshow("Image", im)
+    cv2.waitKey(0)
 
     # LBP algorithm
     lbp = local_binary_pattern(im, no_points, radius, method='uniform')
