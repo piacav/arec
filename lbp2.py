@@ -1,5 +1,8 @@
 import os
 from sklearn.svm import LinearSVC
+from sklearn.metrics import confusion_matrix as cm
+from sklearn.metrics import accuracy_score as acsc
+from sklearn.metrics import classification_report as cr
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -63,7 +66,7 @@ def resizeImage(image):
     return resized
 
 # Function to do random split between training set and test set
-def split_dataset(dataset, train_size=0.85):
+def split_dataset(dataset, train_size=0.70):
     train_set = []
     test_set = []
     for v in dataset.values():
