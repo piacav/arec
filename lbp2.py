@@ -11,7 +11,6 @@ from skimage.feature import local_binary_pattern
 from sklearn.externals import joblib
 
 # Inizialization variables
-dataset_dict = {}
 sbagliati = 0
 indovinati = 0
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
@@ -28,10 +27,6 @@ no_points = 2 * radius
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
 
-# Dataset dict inizialization values
-for n in range(1, 83):
-    dataset_dict[n] = []
-
 # Creation dataset path for different O.S.
 if platform == 'win32':
     dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
@@ -39,12 +34,6 @@ elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
     dataset_path = ''
-
-# Dataset dict creation
-for file in os.listdir(dataset_path):
-    if not file.startswith('.'):
-        persona = int(file[:3])
-        dataset_dict[persona].append(file[:-4])
 
 # Constuct the figure for histogram
 #plt.style.use("ggplot")
@@ -64,16 +53,6 @@ def resizeImage(image):
     resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
     #resized = cv2.resize(image, dim, interpolation=cv2.INTER_CUBIC)
     return resized
-
-# Function to do random split between training set and test set
-def split_dataset(dataset, train_size=0.70):
-    train_set = []
-    test_set = []
-    for v in dataset.values():
-        np.random.shuffle(v)
-        train_set.append(v[:round(len(v)*train_size)])
-        test_set.append(v[round(len(v)*train_size):])
-    return train_set, test_set
 
 # Create an image cropped on face detected by haar classifier
 def rect_create (faces_rect):
@@ -100,15 +79,16 @@ def classifier_age(age):
     else:
         return 4
 
-tr, ts = split_dataset(dataset_dict)
+# Create test set and train set importing document txt
+train_file = open("train_set.txt", "r")
+for i in train_file:
+    train_images.append(i.rstrip())
+train_images = train_images[:-1]
 
-for t in tr:
-    for e in t:
-        train_images += ([e])
-
-for tt in ts:
-    for e in tt:
-        test_images += ([e])
+test_file = open("test_set.txt", "r")
+for i in test_file:
+    test_images.append(i.rstrip())
+test_images = train_images[:-1]
 
 # __________________________________________________ TRAIN _____________________________________________________________
 
