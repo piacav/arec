@@ -12,10 +12,9 @@ classes = {1: "Young",
             2: "Teen",
             3: "Adult",
             4: "Old", }
-sbagliati = 0
-indovinati = 0
-unrecognized = 0
+sbagliati, indovinati, unrecognized = 0, 0, 0
 test_images = []
+
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
 
@@ -52,7 +51,6 @@ def load_caffe_models():
     gender_net = cv2.dnn.readNetFromCaffe('genderage/deploy_gender.prototxt', 'genderage/gender_net.caffemodel')
     return (age_net, gender_net)
 
-
 test_file = open("test_set.txt", "r")
 for i in test_file:
     test_images.append(i.rstrip())
@@ -78,6 +76,8 @@ for test_image in test_images:
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
     if faces_rect == ():
         unrecognized += 1
+        continue
+
     for (x, y, w, h) in faces_rect:
 
         # Create rectangle on image
@@ -91,28 +91,28 @@ for test_image in test_images:
         gender_net.setInput(blob)
         gender_preds = gender_net.forward()
         gender = gender_list[gender_preds[0].argmax()]
-        #print("Gender    : " + gender)
+        print("Gender    : " + gender)
 
         # Predict Age
         age_net.setInput(blob)
         age_preds = age_net.forward()
         age: Union[str, List[str]] = age_list[age_preds[0].argmax()]
-        #print("Age Range : " + age)
+        print("Age Range : " + age)
 
         # Define class
         classdet = classes.get(classifier_age(age))
-        #print("Class     : " + classdet)
+        print("Class     : " + classdet)
 
         # Define real age and class
         real_age = test_image[4:6]
-        #print("Real Age  : " + real_age)
+        print("Real Age  : " + real_age)
 
         real_class = classes.get(classifier_age(int(real_age)))
-        #print("Real Class: " + real_class)
+        print("Real Class: " + real_class)
 
-        #print("Score Age : " + str(age_preds[0]))
-        #print("Score Gen : " + str(gender_preds[0]))
-        #print('#######################')
+        print("Score Age : " + str(age_preds[0]))
+        print("Score Gen : " + str(gender_preds[0]))
+        print('#######################')
 
         # Verification
         l = len(test_images)
@@ -127,6 +127,7 @@ for test_image in test_images:
         #cv2.imshow('image', image_copy)
         #cv2.waitKey(0)
 
-print('INDOVINATI: ' + str(indovinati))
-print('SBAGLIATI: ' + str(sbagliati))
-print('TOTALI: ' + str(indovinati + sbagliati))
+print('INDOVINATI : ' + str(indovinati))
+print('SBAGLIATI  : ' + str(sbagliati))
+print('NON TROVATI: ' + str(unrecognized))
+print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))

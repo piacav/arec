@@ -5,9 +5,7 @@ from skimage.feature import local_binary_pattern
 from sklearn.svm import LinearSVC
 
 # Inizialization variables
-sbagliati = 0
-indovinati = 0
-unrecognized = 0
+sbagliati, indovinati, unrecognized = 0, 0, 0
 rigacm = None
 colonnacm = None
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
@@ -63,7 +61,6 @@ def rect_create (faces_rect):
         c = x + 1
         d = (x + w)-1
         face_img = image_copy[a:b, c:d]
-
     return face_img
 
 # Function to calculate the class of age
@@ -222,8 +219,6 @@ for i in test_images:
     # Predict image
     prediction = model.predict(histNew)
 
-    # Update Confusion Matrix
-
     real_age = int(i[4:6])
     print("Real Age  : " + str(real_age))
 
@@ -237,7 +232,7 @@ for i in test_images:
     print("Score     : " + str(score))
 
     print('#######################')
-    confronto = (classdet, real_class)
+
     if real_class == classdet:
         indovinati += 1
         for key, item in classes.items():
@@ -259,10 +254,9 @@ for i in test_images:
     #cv2.imshow("Image", im)
     #cv2.waitKey(0)
 
-
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
-print('SALTATI    : ' + str(unrecognized))
+print('NON TROVATI: ' + str(unrecognized))
 print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
 print('CONFUSION MATRIX')
 print(np.array(confusion_matrix))
