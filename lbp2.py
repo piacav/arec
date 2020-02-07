@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from skimage.feature import local_binary_pattern
 from sklearn.svm import LinearSVC
+import keras
 
 # Inizialization variables
 sbagliati, indovinati, unrecognized = 0, 0, 0
@@ -254,9 +255,43 @@ for i in test_images:
     #cv2.imshow("Image", im)
     #cv2.waitKey(0)
 
+# Compute metrics for performance evaluation
+cmarray = np.array(confusion_matrix)
+
+TruePositive = np.diag(cmarray)
+
+FalsePositive, FalseNegative, TrueNegative, Accuracy = [], [], [], []
+
+for ifp in range(4):
+    FalsePositive.append(sum(cmarray[:, ifp]) - cmarray[ifp, ifp])
+
+for ifn in range(4):
+    FalseNegative.append(sum(cmarray[ifn, :]) - cmarray[ifn, ifn])
+
+for itn in range(4):
+    temp = np.delete(cmarray, itn, 0)  # delete ith row
+    temp = np.delete(temp, itn, 1)  # delete ith column
+    TrueNegative.append(sum(sum(temp)))
+
+for c in range(4):
+    Accuracy.append((TruePositive[c] + TrueNegative[c])/(TruePositive[c] +
+                                                         TrueNegative[c] +
+                                                         FalsePositive[c] +
+                                                         FalseNegative[c]))
+
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
 print('NON TROVATI: ' + str(unrecognized))
 print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
 print('CONFUSION MATRIX')
-print(np.array(confusion_matrix))
+print(cmarray)
+print('TRUE POSITIVES')
+print(TruePositive)
+print('FALSE POSITIVES')
+print(FalsePositive)
+print('FALSE NEGATIVES')
+print(FalseNegative)
+print('TRUE NEGATIVES')
+print(TrueNegative)
+print('ACCURACY')
+print(Accuracy)
