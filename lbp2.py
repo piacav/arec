@@ -6,9 +6,7 @@ from skimage.feature import local_binary_pattern
 from sklearn.svm import LinearSVC
 
 # Inizialization variables
-sbagliati = 0
-indovinati = 0
-unrecognized = 0
+sbagliati, indovinati, unrecognized = 0, 0, 0
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
 age_class = [14, 24, 59, 100]
 classes = {1: "Young",
@@ -61,7 +59,6 @@ def rect_create (faces_rect):
         c = x + 1
         d = (x + w)-1
         face_img = image_copy[a:b, c:d]
-
     return face_img
 
 # Function to calculate the class of age
@@ -192,8 +189,8 @@ for i in test_images:
     cellSize = h / 10
 
     # Plot gray image and wait
-    cv2.imshow("Image", im)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", im)
+    #cv2.waitKey(0)
 
     # LBP algorithm
     lbp = local_binary_pattern(im, no_points, radius, method='uniform')
@@ -244,9 +241,7 @@ for i in test_images:
     #cv2.imshow("Image", im)
     #cv2.waitKey(0)
 
-
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
-print('NON RICONOSCIUTI  : ' + str(unrecognized))
-
-print('TOTALI     : ' + str(indovinati + sbagliati))
+print('NON TROVATI: ' + str(unrecognized))
+print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
