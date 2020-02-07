@@ -1,5 +1,4 @@
 from sys import platform
-
 import cv2
 import numpy as np
 from skimage.feature import local_binary_pattern
@@ -9,12 +8,15 @@ from sklearn.svm import LinearSVC
 sbagliati = 0
 indovinati = 0
 unrecognized = 0
+rigacm = None
+colonnacm = None
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
 age_class = [14, 24, 59, 100]
 classes = {1: "Young",
             2: "Teen",
             3: "Adult",
             4: "Old", }
+confusion_matrix = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 
 # Number of points to be considered as neighbourers
 radius = 5
@@ -192,8 +194,8 @@ for i in test_images:
     cellSize = h / 10
 
     # Plot gray image and wait
-    cv2.imshow("Image", im)
-    cv2.waitKey(0)
+    # cv2.imshow("Image", im)
+    # cv2.waitKey(0)
 
     # LBP algorithm
     lbp = local_binary_pattern(im, no_points, radius, method='uniform')
@@ -220,6 +222,8 @@ for i in test_images:
     # Predict image
     prediction = model.predict(histNew)
 
+    # Update Confusion Matrix
+
     real_age = int(i[4:6])
     print("Real Age  : " + str(real_age))
 
@@ -233,11 +237,22 @@ for i in test_images:
     print("Score     : " + str(score))
 
     print('#######################')
-
+    confronto = (classdet, real_class)
     if real_class == classdet:
-           indovinati += 1
+        indovinati += 1
+        for key, item in classes.items():
+            if item == classdet:
+                confusion_matrix[key - 1][key - 1] += 1
+                break
     else:
         sbagliati += 1
+        for wkey, witem in classes.items():
+            if witem == real_class:
+                rigacm = wkey
+            if witem == classdet:
+                colonnacm = wkey
+        if rigacm is not None and colonnacm is not None:
+            confusion_matrix[rigacm - 1][colonnacm - 1] += 1
 
     # display the image and the prediction
     #cv2.putText(im, prediction[0], (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
@@ -247,6 +262,7 @@ for i in test_images:
 
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
-print('NON RICONOSCIUTI  : ' + str(unrecognized))
-
-print('TOTALI     : ' + str(indovinati + sbagliati))
+print('SALTATI    : ' + str(unrecognized))
+print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
+print('CONFUSION MATRIX')
+print(np.array(confusion_matrix))
