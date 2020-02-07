@@ -14,6 +14,7 @@ classes = {1: "Young",
             4: "Old", }
 sbagliati = 0
 indovinati = 0
+unrecognized = 0
 test_images = []
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
@@ -75,7 +76,8 @@ for test_image in test_images:
 
     # Applying the haar classifier to detect faces
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
-
+    if faces_rect == ():
+        unrecognized += 1
     for (x, y, w, h) in faces_rect:
 
         # Create rectangle on image

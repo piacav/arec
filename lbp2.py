@@ -8,6 +8,7 @@ from sklearn.svm import LinearSVC
 # Inizialization variables
 sbagliati = 0
 indovinati = 0
+unrecognized = 0
 ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
 age_class = [14, 24, 59, 100]
 classes = {1: "Young",
@@ -104,6 +105,9 @@ for e in train_images:
     # Applying the haar classifier to detect faces
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
 
+    if len(faces_rect) == 0:
+        continue
+
     # Plot gray image and wait
     #cv2.imshow("Image", face_img)
     #cv2.waitKey(0)
@@ -178,6 +182,10 @@ for i in test_images:
     # Applying the haar classifier to detect faces
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
 
+    if len(faces_rect) == 0:
+        unrecognized += 1
+        continue
+
     # Resize cropped image
     im = resizeImage(rect_create(faces_rect))
     (h, w) = im.shape[:2]
@@ -239,4 +247,6 @@ for i in test_images:
 
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
+print('NON RICONOSCIUTI  : ' + str(unrecognized))
+
 print('TOTALI     : ' + str(indovinati + sbagliati))
