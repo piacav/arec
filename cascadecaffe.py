@@ -1,9 +1,14 @@
 from typing import List, Union
 from sys import platform
-
+import numpy as np
 import cv2
+from mlxtend.plotting import plot_confusion_matrix
+import matplotlib.pyplot as plt
 
 # Initialization variables
+rigacm, colonnacm = None, None
+sbagliati, indovinati, unrecognized = 0, 0, 0
+confusion_matrix = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
 age_class = [14, 24, 59, 100]
 age_list = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
@@ -12,7 +17,6 @@ classes = {1: "Young",
             2: "Teen",
             3: "Adult",
             4: "Old", }
-sbagliati, indovinati, unrecognized = 0, 0, 0
 test_images = []
 
 # Specify the Haar classifier
@@ -74,7 +78,8 @@ for test_image in test_images:
 
     # Applying the haar classifier to detect faces
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
-    if faces_rect == ():
+
+    if len(faces_rect) == 0:
         unrecognized += 1
         continue
 
@@ -114,12 +119,22 @@ for test_image in test_images:
         print("Score Gen : " + str(gender_preds[0]))
         print('#######################')
 
-        # Verification
-        l = len(test_images)
+        # Verification age
         if classdet == real_class:
             indovinati += 1
+            for key, item in classes.items():
+                if item == classdet:
+                    confusion_matrix[key - 1][key - 1] += 1
+                    break
         else:
             sbagliati += 1
+            for wkey, witem in classes.items():
+                if witem == real_class:
+                    rigacm = wkey
+                if witem == classdet:
+                    colonnacm = wkey
+            if rigacm is not None and colonnacm is not None:
+                confusion_matrix[rigacm - 1][colonnacm - 1] += 1
 
         # Visualize image
         #overlay_text = "%s %s" % (gender, age)
@@ -127,7 +142,50 @@ for test_image in test_images:
         #cv2.imshow('image', image_copy)
         #cv2.waitKey(0)
 
+# Compute metrics for performance evaluation
+cmarray = np.array(confusion_matrix)
+
+TruePositive = np.diag(cmarray)
+
+FalsePositive, FalseNegative, TrueNegative, Accuracy = [], [], [], []
+
+for ifp in range(4):
+    FalsePositive.append(sum(cmarray[:, ifp]) - cmarray[ifp, ifp])
+
+for ifn in range(4):
+    FalseNegative.append(sum(cmarray[ifn, :]) - cmarray[ifn, ifn])
+
+for itn in range(4):
+    temp = np.delete(cmarray, itn, 0)  # delete ith row
+    temp = np.delete(temp, itn, 1)  # delete ith column
+    TrueNegative.append(sum(sum(temp)))
+
+for c in range(4):
+    Accuracy.append((TruePositive[c] + TrueNegative[c])/(TruePositive[c] +
+                                                         TrueNegative[c] +
+                                                         FalsePositive[c] +
+                                                         FalseNegative[c]))
+
+# Plot non-normalized confusion matrix
+multiclass = np.array(confusion_matrix)
+fig, ax = plot_confusion_matrix(conf_mat=multiclass,
+                                colorbar=True,
+                                class_names=classes.items())
+
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
 print('NON TROVATI: ' + str(unrecognized))
 print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
+print('CONFUSION MATRIX')
+print(cmarray)
+print('TRUE POSITIVES')
+print(TruePositive)
+print('FALSE POSITIVES')
+print(FalsePositive)
+print('FALSE NEGATIVES')
+print(FalseNegative)
+print('TRUE NEGATIVES')
+print(TrueNegative)
+print('ACCURACY')
+print(Accuracy)
+plt.show()

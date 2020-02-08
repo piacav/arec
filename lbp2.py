@@ -3,13 +3,15 @@ import cv2
 import numpy as np
 from skimage.feature import local_binary_pattern
 from sklearn.svm import LinearSVC
-import keras
+from mlxtend.plotting import plot_confusion_matrix
+import matplotlib.pyplot as plt
+from joblib import dump, load
+from sklearn.metrics import classification_report
 
 # Inizialization variables
 sbagliati, indovinati, unrecognized = 0, 0, 0
-rigacm = None
-colonnacm = None
-ts, tr, data, labelList, train_images, test_images = [], [], [], [], [], []
+rigacm, colonnacm = None, None
+ts, tr, data, labelList, train_images, test_images, y_test, y_pred = [], [], [], [], [], [], [], []
 age_class = [14, 24, 59, 100]
 classes = {1: "Young",
             2: "Teen",
@@ -88,78 +90,80 @@ for i in test_file:
 
 print('START TRAINING')
 
-for e in train_images:
+if load("lbp_model.pkl") is None:
 
-    # Create image path
-    imagePath = dataset_path + e + '.jpg'
+    for e in train_images:
 
-    # Read the image
-    im = cv2.imread(imagePath)
+        # Create image path
+        imagePath = dataset_path + e + '.jpg'
 
-    # Convert the test image to gray scale as opencv face detector expects gray images
-    gray_image = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        # Read the image
+        im = cv2.imread(imagePath)
 
-    # Create a copy of the image to prevent any changes to the original one
-    image_copy = gray_image.copy()
+        # Convert the test image to gray scale as opencv face detector expects gray images
+        gray_image = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-    # Applying the haar classifier to detect faces
-    faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
+        # Create a copy of the image to prevent any changes to the original one
+        image_copy = gray_image.copy()
 
-    if len(faces_rect) == 0:
-        continue
+        # Applying the haar classifier to detect faces
+        faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
 
-    # Plot gray image and wait
-    #cv2.imshow("Image", face_img)
-    #cv2.waitKey(0)
+        if len(faces_rect) == 0:
+            continue
 
-    # Resize cropped image
-    im = resizeImage(rect_create(faces_rect))
-    (h, w) = im.shape[:2]
-    cellSize = h/10
+        # Plot gray image and wait
+        #cv2.imshow("Image", face_img)
+        #cv2.waitKey(0)
 
-    # Plot gray image and wait
-    #cv2.imshow("Image", im)
-    #cv2.waitKey(0)
+        # Resize cropped image
+        im = resizeImage(rect_create(faces_rect))
+        (h, w) = im.shape[:2]
+        cellSize = h/10
 
-    # Uniform LBP is used
-    lbp = local_binary_pattern(im, no_points, radius, method='uniform')
-    # Plot lbp
-    #cv2.imshow("LBP", lbp.astype("uint8"))
-    #cv2.waitKey(0)
+        # Plot gray image and wait
+        #cv2.imshow("Image", im)
+        #cv2.waitKey(0)
 
-    # Plot histogram
-    #ax.hist(lbp.ravel(), density=True, bins=20, range=(0, 256))
-    #ax.set_xlim([0, 256])
-    #ax.set_ylim([0, 0.030])
-    #fig.savefig('temp.png', dpi=fig.dpi)
-    #plt.show()
-    #cv2.destroyAllWindows()
+        # Uniform LBP is used
+        lbp = local_binary_pattern(im, no_points, radius, method='uniform')
+        # Plot lbp
+        #cv2.imshow("LBP", lbp.astype("uint8"))
+        #cv2.waitKey(0)
 
-    # Create histogram
-    (hist, _) = np.histogram(lbp.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
+        # Plot histogram
+        #ax.hist(lbp.ravel(), density=True, bins=20, range=(0, 256))
+        #ax.set_xlim([0, 256])
+        #ax.set_ylim([0, 0.030])
+        #fig.savefig('temp.png', dpi=fig.dpi)
+        #plt.show()
+        #cv2.destroyAllWindows()
 
-    # normalize the histogram
-    hist = hist.astype("float")
-    hist /= (hist.sum() + 1e-7)
+        # Create histogram
+        (hist, _) = np.histogram(lbp.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
 
-    # Create label
-    label = classes.get(classifier_age(int(e[4:6])))
+        # normalize the histogram
+        hist = hist.astype("float")
+        hist /= (hist.sum() + 1e-7)
 
-    # Create list of label and list of data for classification
-    labelList.append(label)
-    data.append(hist)
+        # Create label
+        label = classes.get(classifier_age(int(e[4:6])))
 
-# Create a model SVC for classification
-model = LinearSVC(C=100.0, random_state=42, max_iter=100000)
+        # Create list of label and list of data for classification
+        labelList.append(label)
+        data.append(hist)
 
-# Do training
-x = model.fit(data, labelList)
-#print(data)
-print(labelList)
+    # Create a model SVC for classification
+    model = LinearSVC(C=200.0, random_state=42, max_iter=100000)
+    # Do training
+    x = model.fit(data, labelList)
+    #print(data)
+    print(labelList)
+    # Save model
+    dump(model, "lbp_model.pkl")
 
-# Save model
-#joblib.dump(model, "lbp_model.pkl")
-
+else:
+    model = load("lbp_model.pkl")
 # ___________________________________________________ TEST _____________________________________________________________
 
 print('START TESTING')
@@ -192,8 +196,8 @@ for i in test_images:
     cellSize = h / 10
 
     # Plot gray image and wait
-    # cv2.imshow("Image", im)
-    # cv2.waitKey(0)
+    #cv2.imshow("Image", im)
+    #cv2.waitKey(0)
 
     # LBP algorithm
     lbp = local_binary_pattern(im, no_points, radius, method='uniform')
@@ -233,6 +237,9 @@ for i in test_images:
     print("Score     : " + str(score))
 
     print('#######################')
+
+    y_pred.append(classdet)
+    y_test.append(real_class)
 
     if real_class == classdet:
         indovinati += 1
@@ -279,6 +286,13 @@ for c in range(4):
                                                          FalsePositive[c] +
                                                          FalseNegative[c]))
 
+# Plot non-normalized confusion matrix
+fig, ax = plot_confusion_matrix(conf_mat=cmarray,
+                                colorbar=True,
+                                class_names=classes.items())
+
+print(classification_report(y_test, y_pred))
+
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
 print('NON TROVATI: ' + str(unrecognized))
@@ -295,3 +309,4 @@ print('TRUE NEGATIVES')
 print(TrueNegative)
 print('ACCURACY')
 print(Accuracy)
+plt.show()
