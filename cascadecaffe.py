@@ -8,15 +8,14 @@ import matplotlib.pyplot as plt
 # Initialization variables
 rigacm, colonnacm = None, None
 sbagliati, indovinati, unrecognized = 0, 0, 0
-confusion_matrix = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+confusion_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
-age_class = [14, 24, 59, 100]
+age_class = [10, 50, 100]
 age_list = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 gender_list = ['Male', 'Female']
 classes = {1: "Young",
             2: "Teen",
-            3: "Adult",
-            4: "Old", }
+            3: "Adult"}
 test_images = []
 
 # Specify the Haar classifier
@@ -46,9 +45,9 @@ def classifier_age(age):
         return 1
     elif max <= age_class[1]:
         return 2
-    elif max <= age_class[2]:
-        return 3
-    return 4
+    #elif max <= age_class[2]:
+    #    return 3
+    return 3
 
 # Load model for age called caffe
 def load_caffe_models():
@@ -150,18 +149,18 @@ TruePositive = np.diag(cmarray)
 
 FalsePositive, FalseNegative, TrueNegative, Accuracy = [], [], [], []
 
-for ifp in range(4):
+for ifp in range(3):
     FalsePositive.append(sum(cmarray[:, ifp]) - cmarray[ifp, ifp])
 
-for ifn in range(4):
+for ifn in range(3):
     FalseNegative.append(sum(cmarray[ifn, :]) - cmarray[ifn, ifn])
 
-for itn in range(4):
+for itn in range(3):
     temp = np.delete(cmarray, itn, 0)  # delete ith row
     temp = np.delete(temp, itn, 1)  # delete ith column
     TrueNegative.append(sum(sum(temp)))
 
-for c in range(4):
+for c in range(3):
     Accuracy.append((TruePositive[c] + TrueNegative[c])/(TruePositive[c] +
                                                          TrueNegative[c] +
                                                          FalsePositive[c] +

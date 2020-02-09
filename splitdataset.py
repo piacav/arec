@@ -8,7 +8,7 @@ dataset_dict = {}
 dataset_list, train_images, test_images = [], [], []
 
 # Function to do random split between training set and test set
-def split_dataset(dataset, train_size=0.70):
+def split_dataset(dataset, train_size=0.80):
     train_set = []
     test_set = []
     for v in dataset.values():
@@ -28,13 +28,18 @@ else:
     dataset_path = ''
 
 # Dataset dict inizialization values
-for n in range(1, 98):
+for n in range(1, 4):
     dataset_dict[n] = []
 
 for file in os.listdir(dataset_path):
     if not file.startswith('.'):
-        persona = int(file[:3])
-        dataset_dict[persona].append(file[:-4])
+        eta = int(file[4:6])
+        if eta <= 10:
+            dataset_dict[1].append(file[:-4])
+        elif eta <= 50:
+            dataset_dict[2].append(file[:-4])
+        else:
+            dataset_dict[3].append(file[:-4])
 
 tr, ts = split_dataset(dataset_dict)
 

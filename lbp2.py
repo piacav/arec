@@ -14,7 +14,7 @@ sbagliati, indovinati, unrecognized = 0, 0, 0
 rigacm, colonnacm = None, None
 ts, tr, data, labelList, train_images, test_images, y_test, y_pred = [], [], [], [], [], [], [], []
 
-age_class = [18, 50, 100]
+age_class = [10, 50, 100]
 classes = {1: "Young",
             2: "Teen",
             3: "Adult"}
@@ -298,7 +298,7 @@ print(classification_report(y_test, y_pred))
 
 print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
-print('NON TROVATI: ' + str(unrecognized))
+print('NON TROVATI: ' + str(unrecognized))  #erano 81
 print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
 print(' ')
 print('CONFUSION MATRIX')
