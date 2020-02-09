@@ -27,7 +27,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 # Creation dataset path for different O.S.
 if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+    dataset_path = 'D:\\FGNET\\images\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:

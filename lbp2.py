@@ -7,17 +7,22 @@ from mlxtend.plotting import plot_confusion_matrix
 import matplotlib.pyplot as plt
 from joblib import dump, load
 from sklearn.metrics import classification_report
+from os import path
 
 # Inizialization variables
 sbagliati, indovinati, unrecognized = 0, 0, 0
 rigacm, colonnacm = None, None
 ts, tr, data, labelList, train_images, test_images, y_test, y_pred = [], [], [], [], [], [], [], []
-age_class = [14, 24, 59, 100]
+
+age_class = [18, 50, 100]
 classes = {1: "Young",
             2: "Teen",
-            3: "Adult",
-            4: "Old", }
-confusion_matrix = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+            3: "Adult"}
+            #4: "Old", }
+
+confusion_matrix = [[0, 0, 0],
+                    [0, 0, 0],
+                    [0, 0, 0]]
 
 # Number of points to be considered as neighbourers
 radius = 5
@@ -28,7 +33,8 @@ cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalfac
 
 # Creation dataset path for different O.S.
 if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+    dataset_path = 'D:\\FGNET\\images\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
@@ -72,10 +78,9 @@ def classifier_age(age):
         return 1
     elif age <= age_class[1]:
         return 2
-    elif age <= age_class[2]:
-        return 3
     else:
-        return 4
+        return 3
+
 
 # Create test set and train set importing document txt
 train_file = open("train_set.txt", "r")
@@ -88,10 +93,8 @@ for i in test_file:
 
 # __________________________________________________ TRAIN _____________________________________________________________
 
-print('START TRAINING')
-
-if load("lbp_model.pkl") is None:
-
+if not path.exists("lbp_model.pkl"):
+    print('START TRAINING')
     for e in train_images:
 
         # Create image path
@@ -269,18 +272,18 @@ TruePositive = np.diag(cmarray)
 
 FalsePositive, FalseNegative, TrueNegative, Accuracy = [], [], [], []
 
-for ifp in range(4):
+for ifp in range(3):
     FalsePositive.append(sum(cmarray[:, ifp]) - cmarray[ifp, ifp])
 
-for ifn in range(4):
+for ifn in range(3):
     FalseNegative.append(sum(cmarray[ifn, :]) - cmarray[ifn, ifn])
 
-for itn in range(4):
+for itn in range(3):
     temp = np.delete(cmarray, itn, 0)  # delete ith row
     temp = np.delete(temp, itn, 1)  # delete ith column
     TrueNegative.append(sum(sum(temp)))
 
-for c in range(4):
+for c in range(3):
     Accuracy.append((TruePositive[c] + TrueNegative[c])/(TruePositive[c] +
                                                          TrueNegative[c] +
                                                          FalsePositive[c] +
@@ -297,6 +300,7 @@ print('INDOVINATI : ' + str(indovinati))
 print('SBAGLIATI  : ' + str(sbagliati))
 print('NON TROVATI: ' + str(unrecognized))
 print('TOTALI     : ' + str(indovinati + sbagliati + unrecognized))
+print(' ')
 print('CONFUSION MATRIX')
 print(cmarray)
 print('TRUE POSITIVES')

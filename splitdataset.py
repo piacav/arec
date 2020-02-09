@@ -20,15 +20,15 @@ def split_dataset(dataset, train_size=0.70):
 
 # Create dataset path and list
 if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    #dataset_path = 'D:\\FGNET\\images\\'
+    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
+    dataset_path = 'D:\\FGNET\\images\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
     dataset_path = ''
 
 # Dataset dict inizialization values
-for n in range(1, 83):
+for n in range(1, 98):
     dataset_dict[n] = []
 
 for file in os.listdir(dataset_path):
