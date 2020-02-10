@@ -20,10 +20,10 @@ def split_dataset(dataset, train_size=0.80):
 
 # Create dataset path and list
 if platform == 'win32':
-    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    dataset_path = 'D:\\FGNET\\images\\'
+    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
+    #dataset_path = 'D:\\FGNET\\images\\'
 elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
+    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images2/'
 else:
     dataset_path = ''
 
@@ -58,10 +58,10 @@ test = open("test_set.txt", "w+")
 train = open("train_set.txt", "w+")
 
 for i in test_images:
-     test.write(str(i) + "\n")
+    test.write(str(i) + "\n")
 
 for j in train_images:
-     train.write(str(j) + "\n")
+    train.write(str(j) + "\n")
 
 train.close()
 test.close()
