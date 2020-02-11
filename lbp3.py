@@ -15,7 +15,8 @@ r_age, c_age, r_gen, c_gen = None, None, None, None
 ts, tr, data, labelList_age, labelList_gen, train_images, test_images, \
 y_test_age, y_pred_age, y_test_gen, y_pred_gen = \
     [], [], [], [], [], [], [], [], [], [], []
-age_param = [10, 50, 100]
+age_param = [10, 40, 100]
+divisions = 8
 classes_age = {1: "Children",
                2: "Young",
                3: "Adult"}
@@ -26,7 +27,6 @@ confusion_matrix_age = [[0, 0, 0],
                         [0, 0, 0]]
 confusion_matrix_gen = [[0, 0],
                        [0, 0]]
-
 # Number of points to be considered as neighbourers
 radius = 5
 no_points = 5 * radius
@@ -102,6 +102,7 @@ for i in test_file:
 if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
     print('START TRAINING')
     for e in train_images:
+        conchist = np.array([])
 
         # Create image path
         imagePath = dataset_path + e + '.jpg'
@@ -127,8 +128,6 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
 
         # Resize cropped image
         im = resizeImage(rect_create(faces_rect))
-        (h, w) = im.shape[:2]
-        cellSize = h/10
 
         # Plot gray image and wait
         #cv2.imshow("Image", im)
@@ -148,12 +147,25 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
         #plt.show()
         #cv2.destroyAllWindows()
 
-        # Create histogram
-        (hist, _) = np.histogram(lbp.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
+        (h, w) = lbp.astype("uint8").shape[:2]
+        himage = int(h / divisions)
+        wimage = int(w / divisions)
+        for i in range(divisions):
+            y = himage * i
+            x = 0
+            for j in range(divisions):
+                fragment = lbp.astype("uint8")[y:(himage*(i+1)), x:(wimage*(j+1))]
 
+                # Create histogram
+                (hist, _) = np.histogram(fragment.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
+                if len(conchist) == 0:
+                    conchist = hist
+                else:
+                    conchist = np.append(conchist, hist)
         # normalize the histogram
-        hist = hist.astype("float")
-        hist /= (hist.sum() + 1e-7)
+        conchist = conchist.astype("float")
+        conchist /= (conchist.sum() + 1e-7)
+        print(conchist)
 
         # Create label
         label_age = classes_age.get(classifier_age(int(e[4:6])))
@@ -162,19 +174,17 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
         # Create list of label and list of data for classification
         labelList_age.append(label_age)
         labelList_gen.append(label_gen)
-        data.append(hist)
+        data.append(conchist)
+
     print(labelList_age)
     print(labelList_gen)
     # Create a model SVC for age and gender classification
-    model_age = LinearSVC(C=200.0, random_state=42, max_iter=100000)
-    model_gen = LinearSVC(C=200.0, random_state=42, max_iter=100000)
+    model_age = LinearSVC(C=200.0, random_state=42, max_iter=10000000)
+    model_gen = LinearSVC(C=200.0, random_state=42, max_iter=10000000)
 
-    # Do training
     x = model_age.fit(data, labelList_age)
     y = model_gen.fit(data, labelList_gen)
-    #print(data)
-    print(labelList_age)
-    print(labelList_gen)
+
     # Save model
     dump(model_age, "lbp_model_age.pkl")
     dump(model_gen, "lbp_model_gen.pkl")
@@ -185,9 +195,9 @@ else:
 # ___________________________________________________ TEST _____________________________________________________________
 
 print('START TESTING')
-
 # loop over the testing images
 for i in test_images:
+    conchist = np.array([])
 
     # Create image path
     imagePath = dataset_path + i + '.jpg'
@@ -210,8 +220,6 @@ for i in test_images:
 
     # Resize cropped image
     im = resizeImage(rect_create(faces_rect))
-    (h, w) = im.shape[:2]
-    cellSize = h / 10
 
     # Plot gray image and wait
     #cv2.imshow("Image", im)
@@ -220,8 +228,8 @@ for i in test_images:
     # LBP algorithm
     lbp = local_binary_pattern(im, no_points, radius, method='uniform')
     # Plot lbp
-    # cv2.imshow("LBP", lbp.astype("uint8"))
-    # cv2.waitKey(0)
+    cv2.imshow("LBP", lbp.astype("uint8"))
+    cv2.waitKey(0)
 
     # Plot histogram
     # ax.hist(lbp.ravel(), density=True, bins=20, range=(0, 256))
@@ -231,13 +239,25 @@ for i in test_images:
     # plt.show()
     # cv2.destroyAllWindows()
 
-    # Create histogram
-    (histt, _) = np.histogram(lbp.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
-    #print(histt)
+    (h, w) = lbp.astype("uint8").shape[:2]
+    himage = int(h / divisions)
+    wimage = int(w / divisions)
+    for l in range(divisions):
+        y = himage * l
+        x = 0
+        for j in range(divisions):
+            fragment = lbp[y:(himage * (l + 1)), x:(wimage * (j + 1))]
+
+            # Create histogram
+            (hist, _) = np.histogram(fragment.ravel(), bins=np.arange(0, no_points + 3), range=(0, no_points + 2))
+            if len(conchist) == 0:
+                conchist = hist
+            else:
+                conchist = np.append(conchist, hist)
     # normalize the histogram
-    histt = histt.astype("float")
-    histt /= (histt.sum() + 1e-7)
-    histNew = np.reshape(histt, (1, len(histt)))
+    conchist = conchist.astype("float")
+    conchist /= (conchist.sum() + 1e-7)
+    histNew = np.reshape(conchist, (1, len(conchist)))
 
     # Predict image
     prediction_age = model_age.predict(histNew)
