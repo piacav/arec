@@ -6,6 +6,9 @@ import numpy as np
 dataset_dict_age, dataset_dict_gen = {}, {}
 dataset_list, train_images, test_images = [], [], []
 
+# Create dataset path
+dataset_path = 'images2'
+
 # Function to do random split between training set and test set
 def split_dataset(dataset, train_size=0.80):
     train_set = []
@@ -15,16 +18,6 @@ def split_dataset(dataset, train_size=0.80):
         train_set.append(v[:round(len(v)*train_size)])
         test_set.append(v[round(len(v)*train_size):])
     return train_set, test_set
-
-# Create dataset path and list
-if platform == 'win32':
-    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
-    #dataset_path = 'D:\\FGNET\\images\\'
-    dataset_path = 'C:\\Users\\piaca\\Desktop\\images2\\'
-elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images2/'
-else:
-    dataset_path = ''
 
 # Dataset dict for age nd gender inizialization values
 for n in range(1, 4):

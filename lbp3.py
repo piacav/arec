@@ -15,6 +15,8 @@ r_age, c_age, r_gen, c_gen = None, None, None, None
 ts, tr, data, labelList_age, labelList_gen, train_images, test_images, \
 y_test_age, y_pred_age, y_test_gen, y_pred_gen = \
     [], [], [], [], [], [], [], [], [], [], []
+FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
+FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
 age_param = [10, 40, 100]
 divisions = 8
 classes_age = {1: "Children",
@@ -27,21 +29,16 @@ confusion_matrix_age = [[0, 0, 0],
                         [0, 0, 0]]
 confusion_matrix_gen = [[0, 0],
                        [0, 0]]
+
+# Create dataset path
+dataset_path = 'images2/'
+
 # Number of points to be considered as neighbourers
 radius = 5
 no_points = 5 * radius
 
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
-
-# Creation dataset path for different O.S.
-if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
-    #dataset_path = 'D:\\FGNET\\images\\'
-elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images2/'
-else:
-    dataset_path = ''
 
 # Constuct the figure for histogram
 #plt.style.use("ggplot")
@@ -337,62 +334,53 @@ cmarray_age = np.array(confusion_matrix_age)
 cmarray_gen = np.array(confusion_matrix_gen)
 
 TruePositive_age = np.diag(cmarray_age)
+TruePositive_gen = np.diag(cmarray_gen)
 
-FalsePositive_age, FalseNegative_age, TrueNegative_age, Accuracy_age = [], [], [], []
-FalsePositive_gen, FalseNegative_gen, TrueNegative_gen, Accuracy_gen = [], [], [], []
-
-for ifp in range(3):
-    FalsePositive_age.append(sum(cmarray_age[:, ifp]) - cmarray_age[ifp, ifp])
-
-for ifn in range(3):
-    FalseNegative_age.append(sum(cmarray_age[ifn, :]) - cmarray_age[ifn, ifn])
-
-for itn in range(3):
-    temp = np.delete(cmarray_age, itn, 0)  # delete ith row
-    temp = np.delete(temp, itn, 1)  # delete ith column
+for i_cm in range(3):
+    FalsePositive_age.append(sum(cmarray_age[:, i_cm]) - cmarray_age[i_cm, i_cm])
+    FalseNegative_age.append(sum(cmarray_age[i_cm, :]) - cmarray_age[i_cm, i_cm])
+    temp = np.delete(cmarray_age, i_cm, 0)  # delete ith row
+    temp = np.delete(temp, i_cm, 1)  # delete ith column
     TrueNegative_age.append(sum(sum(temp)))
 
-for c in range(3):
-    Accuracy_age.append((TruePositive_age[c] + TrueNegative_age[c]) / (TruePositive_age[c] +
-                                                                       TrueNegative_age[c] +
-                                                                       FalsePositive_age[c] +
-                                                                       FalseNegative_age[c]))
+    if i_cm == 2: break
+    FalsePositive_gen.append(sum(cmarray_gen[:, i_cm]) - cmarray_gen[i_cm, i_cm])
+    FalseNegative_gen.append(sum(cmarray_gen[i_cm, :]) - cmarray_gen[i_cm, i_cm])
+    temp2 = np.delete(cmarray_gen, i_cm, 0)  # delete ith row
+    temp2 = np.delete(temp2, i_cm, 1)  # delete ith column
+    TrueNegative_gen.append(sum(sum(temp2)))
 
-# Plot non-normalized confusion matrix
-fig, ax = plot_confusion_matrix(conf_mat=cmarray_age,
+# Plot non-normalized age confusion matrix
+fig_age, ax_age = plot_confusion_matrix(conf_mat=cmarray_age,
                                 colorbar=True,
                                 class_names=classes_age.items())
 
-print(' ')
-print('TOTAL     : ' + str(correct_age + wrong_age + unrecognized))
-print('NO FACE   : ' + str(unrecognized))  #erano 81
-print(' ')
+# Plot non-normalized gender confusion matrix
+fig_gen, ax_gen = plot_confusion_matrix(conf_mat=cmarray_gen,
+                                colorbar=True,
+                                class_names=classes_gen.items())
 
-print('AGE DATA')
-print(classification_report(y_test_age, y_pred_age))
-print('CONFUSION MATRIX')
-print(cmarray_age)
-print('CORRECT    : ' + str(correct_age))
-print('WRONG      : ' + str(wrong_age))
-print('TRUE POSITIVES')
-print(TruePositive_age)
-print('FALSE POSITIVES')
-print(FalsePositive_age)
-print('FALSE NEGATIVES')
-print(FalseNegative_age)
-print('TRUE NEGATIVES')
-print(TrueNegative_age)
-print('ACCURACY')
-print(Accuracy_age)
-print(' ')
+# Print results
+output_tot = ('TOTAL     : ' + str(correct_age + wrong_age + unrecognized) +
+            '\nNO FACE   : ' + str(unrecognized))
 
-print('GENDER DATA')
-print(classification_report(y_test_gen, y_pred_gen))
-print('CONFUSION MATRIX')
-print(cmarray_gen)
-print('CORRECT    : ' + str(correct_gen))
-print('WRONG      : ' + str(wrong_gen))
-print(' ')
+output_age = ('AGE DATA' + '\n' + classification_report(y_test_age, y_pred_age) +
+            '\nCORRECT : ' + str(correct_age) +
+            '\nWRONG  : ' + str(wrong_age) +
+            '\nTRUE POSITIVES   : ' + str(TruePositive_age) +
+            '\nFALSE POSITIVES  : ' + str(FalsePositive_age) +
+            '\nFALSE NEGATIVES  : ' + str(FalseNegative_age) +
+            '\nTRUE NEGATIVES   : ' + str(TrueNegative_age) +
+            '\nCONFUSION MATRIX :\n' + str(cmarray_age))
 
+output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_gen) +
+            '\nCORRECT : ' + str(correct_gen) +
+            '\nWRONG  : ' + str(wrong_gen) +
+            '\nTRUE POSITIVES   : ' + str(TruePositive_gen) +
+            '\nFALSE POSITIVES  : ' + str(FalsePositive_gen) +
+            '\nFALSE NEGATIVES  : ' + str(FalseNegative_gen) +
+            '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
+            '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
 
+print('\n\n' + output_tot + '\n\n' + output_age + '\n\n' + output_gen)
 plt.show()

@@ -26,21 +26,14 @@ classes_gen = {1: "Male",
                2: "Female"}
 test_images = []
 
+# Create dataset path
+dataset_path = 'images2/'
+
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
 
 # Specify font used for plotting
 font = cv2.FONT_HERSHEY_SIMPLEX
-
-# Creation dataset path for different O.S.
-if platform == 'win32':
-    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    #dataset_path = 'D:\\FGNET\\images2\\'
-    dataset_path = 'C:\\Users\\piaca\\Desktop\\images2\\'
-elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
-else:
-    dataset_path = ''
 
 # Function to calculate the class of age
 def classifier_age(age):
@@ -234,5 +227,5 @@ output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_ge
             '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
             '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
 
-print(output_tot + '\n\n' + output_age + '\n\n' + output_gen)
+print('\n\n' + output_tot + '\n\n' + output_age + '\n\n' + output_gen)
 plt.show()
