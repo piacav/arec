@@ -4,13 +4,15 @@ import numpy as np
 import cv2
 from mlxtend.plotting import plot_confusion_matrix
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, multilabel_confusion_matrix
 
 
 # Initialization variables
 r_age, c_age, r_gen, c_gen = None, None, None, None
 wrong_age, correct_age, wrong_gen, correct_gen, unrecognized = 0, 0, 0, 0, 0
 y_test_age, y_pred_age, y_test_gen, y_pred_gen = [], [], [], []
+FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
+FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
 confusion_matrix_age = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 confusion_matrix_gen = [[0, 0], [0, 0]]
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
@@ -33,7 +35,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Creation dataset path for different O.S.
 if platform == 'win32':
     #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    dataset_path = 'D:\\FGNET\\images\\'
+    dataset_path = 'D:\\FGNET\\images2\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
@@ -69,14 +71,14 @@ test_file = open("test_set.txt", "r")
 for i in test_file:
     test_images.append(i.rstrip())
 
+# Load a model
+age_net, gender_net = load_caffe_models()
 for test_image in test_images:
 
-    # Load a model
-    age_net, gender_net = load_caffe_models()
+
 
     # Create image path
     imagePath = dataset_path + test_image + '.jpg'
-
     # Read image
     ti = cv2.imread(imagePath)
 
@@ -108,6 +110,7 @@ for test_image in test_images:
         gen_det = gender_list[gender_preds[0].argmax()]
         print("Gender Pred: " + gen_det)
 
+        # Get real gender
         real_gen = classifier_gender(test_image[-1])
         print("Real Gen  : " + real_gen)
 
@@ -125,6 +128,7 @@ for test_image in test_images:
         real_age = test_image[4:6]
         print("Real Age  : " + real_age)
 
+        # Get real age class
         real_age_class = classes_age.get(classifier_age(int(real_age)))
         print("Real Class: " + real_age_class)
 
@@ -137,7 +141,7 @@ for test_image in test_images:
         y_pred_gen.append(gen_det)
         y_test_gen.append(real_gen)
 
-        # Verification age
+        # Age check
         if age_det == real_age_class:
             correct_age += 1
             for key, item in classes_age.items():
@@ -154,22 +158,22 @@ for test_image in test_images:
             if r_age is not None and c_age is not None:
                 confusion_matrix_age[r_age - 1][c_age - 1] += 1
 
-            # Gender check
-            if real_gen == gen_det:
-                correct_gen += 1
-                for key, item in classes_gen.items():
-                    if item == gen_det:
-                        confusion_matrix_gen[key - 1][key - 1] += 1
-                        break
-            else:
-                wrong_gen += 1
-                for wkey, witem in classes_gen.items():
-                    if witem == real_gen:
-                        r_gen = wkey
-                    if witem == gen_det:
-                        c_gen = wkey
-                if r_gen is not None and c_gen is not None:
-                    confusion_matrix_gen[r_gen - 1][c_gen - 1] += 1
+        # Gender check
+        if real_gen == gen_det:
+            correct_gen += 1
+            for key, item in classes_gen.items():
+                if item == gen_det:
+                    confusion_matrix_gen[key - 1][key - 1] += 1
+                    break
+        else:
+            wrong_gen += 1
+            for wkey, witem in classes_gen.items():
+                if witem == real_gen:
+                    r_gen = wkey
+                if witem == gen_det:
+                    c_gen = wkey
+            if r_gen is not None and c_gen is not None:
+                confusion_matrix_gen[r_gen - 1][c_gen - 1] += 1
 
         # Visualize image
         #overlay_text = "%s %s" % (gender, age)
@@ -177,54 +181,59 @@ for test_image in test_images:
         #cv2.imshow('image', image_copy)
         #cv2.waitKey(0)
 
-# Compute metrics for performance evaluation
-cmarray = np.array(confusion_matrix_age)
+# Convert python lists in nparray
+cmarray_age = np.array(confusion_matrix_age)
 cmarray_gen = np.array(confusion_matrix_gen)
 
-TruePositive = np.diag(cmarray)
+# Compute age and gender metrics for performance evaluation
+TruePositive_age = np.diag(cmarray_age)
+TruePositive_gen = np.diag(cmarray_gen)
 
-FalsePositive, FalseNegative, TrueNegative, Accuracy = [], [], [], []
+for i_cm in range(3):
+    FalsePositive_age.append(sum(cmarray_age[:, i_cm]) - cmarray_age[i_cm, i_cm])
+    FalseNegative_age.append(sum(cmarray_age[i_cm, :]) - cmarray_age[i_cm, i_cm])
+    temp = np.delete(cmarray_age, i_cm, 0)  # delete ith row
+    temp = np.delete(temp, i_cm, 1)  # delete ith column
+    TrueNegative_age.append(sum(sum(temp)))
 
-for ifp in range(3):
-    FalsePositive.append(sum(cmarray[:, ifp]) - cmarray[ifp, ifp])
+    if i_cm == 2: break
+    FalsePositive_gen.append(sum(cmarray_gen[:, i_cm]) - cmarray_gen[i_cm, i_cm])
+    FalseNegative_gen.append(sum(cmarray_gen[i_cm, :]) - cmarray_gen[i_cm, i_cm])
+    temp2 = np.delete(cmarray_gen, i_cm, 0)  # delete ith row
+    temp2 = np.delete(temp2, i_cm, 1)  # delete ith column
+    TrueNegative_gen.append(sum(sum(temp2)))
 
-for ifn in range(3):
-    FalseNegative.append(sum(cmarray[ifn, :]) - cmarray[ifn, ifn])
-
-for itn in range(3):
-    temp = np.delete(cmarray, itn, 0)  # delete ith row
-    temp = np.delete(temp, itn, 1)  # delete ith column
-    TrueNegative.append(sum(sum(temp)))
-
-for c in range(3):
-    Accuracy.append((TruePositive[c] + TrueNegative[c])/(TruePositive[c] +
-                                                         TrueNegative[c] +
-                                                         FalsePositive[c] +
-                                                         FalseNegative[c]))
-
-# Plot non-normalized confusion matrix
-cmarray_age = np.array(confusion_matrix_age)
-fig, ax = plot_confusion_matrix(conf_mat=cmarray_age,
+# Plot non-normalized age confusion matrix
+fig_age, ax_age = plot_confusion_matrix(conf_mat=cmarray_age,
                                 colorbar=True,
                                 class_names=classes_age.items())
 
-print(classification_report(y_test_age, y_pred_age))
-print(classification_report(y_test_gen, y_pred_gen))
+# Plot non-normalized gender confusion matrix
+fig_gen, ax_gen = plot_confusion_matrix(conf_mat=cmarray_gen,
+                                colorbar=True,
+                                class_names=classes_gen.items())
 
-print('INDOVINATI : ' + str(correct_age))
-print('SBAGLIATI  : ' + str(wrong_age))
-print('NON TROVATI: ' + str(unrecognized))
-print('TOTALI     : ' + str(correct_age + wrong_age + unrecognized))
-print('CONFUSION MATRIX')
-print(cmarray)
-print('TRUE POSITIVES')
-print(TruePositive)
-print('FALSE POSITIVES')
-print(FalsePositive)
-print('FALSE NEGATIVES')
-print(FalseNegative)
-print('TRUE NEGATIVES')
-print(TrueNegative)
-print('ACCURACY')
-print(Accuracy)
+# Print results
+output_tot = ('TOTAL     : ' + str(correct_age + wrong_age + unrecognized) +
+            '\nNO FACE   : ' + str(unrecognized))
+
+output_age = ('AGE DATA' + '\n' + classification_report(y_test_age, y_pred_age) +
+            '\nCORRECT : ' + str(correct_age) +
+            '\nWRONG  : ' + str(wrong_age) +
+            '\nTRUE POSITIVES   : ' + str(TruePositive_age) +
+            '\nFALSE POSITIVES  : ' + str(FalsePositive_age) +
+            '\nFALSE NEGATIVES  : ' + str(FalseNegative_age) +
+            '\nTRUE NEGATIVES   : ' + str(TrueNegative_age) +
+            '\nCONFUSION MATRIX :\n' + str(cmarray_age))
+
+output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_gen) +
+            '\nCORRECT : ' + str(correct_gen) +
+            '\nWRONG  : ' + str(wrong_gen) +
+            '\nTRUE POSITIVES   : ' + str(TruePositive_gen) +
+            '\nFALSE POSITIVES  : ' + str(FalsePositive_gen) +
+            '\nFALSE NEGATIVES  : ' + str(FalseNegative_gen) +
+            '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
+            '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
+
+print(output_tot + '\n\n' + output_age + '\n\n' + output_gen)
 plt.show()
