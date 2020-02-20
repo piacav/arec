@@ -35,7 +35,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Creation dataset path for different O.S.
 if platform == 'win32':
     #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
-    dataset_path = 'D:\\FGNET\\images2\\'
+    #dataset_path = 'D:\\FGNET\\images2\\'
+    dataset_path = 'C:\\Users\\piaca\\Desktop\\images2\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
@@ -74,8 +75,6 @@ for i in test_file:
 # Load a model
 age_net, gender_net = load_caffe_models()
 for test_image in test_images:
-
-
 
     # Create image path
     imagePath = dataset_path + test_image + '.jpg'

@@ -2,9 +2,8 @@ import os
 from sys import platform
 import numpy as np
 
-
 # Inizialization variables
-dataset_dict = {}
+dataset_dict_age, dataset_dict_gen = {}, {}
 dataset_list, train_images, test_images = [], [], []
 
 # Function to do random split between training set and test set
@@ -17,54 +16,69 @@ def split_dataset(dataset, train_size=0.80):
         test_set.append(v[round(len(v)*train_size):])
     return train_set, test_set
 
-
 # Create dataset path and list
 if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
+    #dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
     #dataset_path = 'D:\\FGNET\\images\\'
+    dataset_path = 'C:\\Users\\piaca\\Desktop\\images2\\'
 elif platform == 'darwin':
     dataset_path = '/Users/piacavasinni/Desktop/FGNET/images2/'
 else:
     dataset_path = ''
 
-# Dataset dict inizialization values
+# Dataset dict for age nd gender inizialization values
 for n in range(1, 4):
-    dataset_dict[n] = []
+    dataset_dict_age[n] = []
+for m in range(1, 3):
+    dataset_dict_gen[m] = []
 
+# Add value on dict for age with different classifications
 for file in os.listdir(dataset_path):
     if not file.startswith('.'):
         eta = int(file[4:6])
         if eta <= 10:
-            dataset_dict[1].append(file[:-4])
+            dataset_dict_age[1].append(file[:-4])
         elif eta <= 50:
-            dataset_dict[2].append(file[:-4])
+            dataset_dict_age[2].append(file[:-4])
         else:
-            dataset_dict[3].append(file[:-4])
+            dataset_dict_age[3].append(file[:-4])
 
-tr, ts = split_dataset(dataset_dict)
+# Add value on dict for gender with M of F classification
+for file in os.listdir(dataset_path):
+    if not file.startswith('.'):
+        gen = file[-1]
+        if gen == 'M':
+            dataset_dict_gen[1].append(file[:-4])
+        else:
+            dataset_dict_gen[2].append(file[:-4])
 
+# Split dataset with random function. Change dataset for change split type
+tr, ts = split_dataset(dataset_dict_age)
+
+# Create train images list with images name
 for t in tr:
     for e in t:
         train_images += ([e])
 
+# Create test images list with images name
 for tt in ts:
     for e in tt:
         test_images += ([e])
 
-print(train_images)
-print(test_images)
-
+# Open txt documents for train set and test set
 test = open("test_set.txt", "w+")
 train = open("train_set.txt", "w+")
 
+# Write on documents the images name
 for i in test_images:
     test.write(str(i) + "\n")
 
 for j in train_images:
     train.write(str(j) + "\n")
 
+# Close documents
 train.close()
 test.close()
 
-
-
+# Print elements in documents
+print("TRAIN SET:\n" + str(train_images) + "\nTEST SET : \n" + str(test_images))
