@@ -7,7 +7,7 @@ dataset_dict_age, dataset_dict_gen = {}, {}
 dataset_list, train_images, test_images = [], [], []
 
 # Create dataset path
-dataset_path = 'images2'
+dataset_path = 'images'
 
 # Function to do random split between training set and test set
 def split_dataset(dataset, train_size=0.80):

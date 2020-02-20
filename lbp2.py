@@ -36,10 +36,10 @@ cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalfac
 
 # Creation dataset path for different O.S.
 if platform == 'win32':
-    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images2\\'
+    dataset_path = 'C:\\Users\\andry\\Desktop\\FGNET\\images\\'
     #dataset_path = 'D:\\FGNET\\images\\'
 elif platform == 'darwin':
-    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images2/'
+    dataset_path = '/Users/piacavasinni/Desktop/FGNET/images/'
 else:
     dataset_path = ''
 

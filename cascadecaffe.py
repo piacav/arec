@@ -27,7 +27,7 @@ classes_gen = {1: "Male",
 test_images = []
 
 # Create dataset path
-dataset_path = 'images2/'
+dataset_path = 'images/'
 
 # Specify the Haar classifier
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')

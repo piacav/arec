@@ -31,7 +31,7 @@ confusion_matrix_gen = [[0, 0],
                        [0, 0]]
 
 # Create dataset path
-dataset_path = 'images2/'
+dataset_path = 'images/'
 
 # Number of points to be considered as neighbourers
 radius = 5
