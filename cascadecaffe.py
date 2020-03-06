@@ -227,5 +227,7 @@ output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_ge
             '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
             '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
 
-print('\n\n' + output_tot + '\n\n' + output_age + '\n\n' + output_gen)
+line = ("________________________________________________________")
+
+print('\n' + line + output_tot + '\n' + line + output_age + '\n' + line + output_gen + '\n' + line)
 plt.show()
