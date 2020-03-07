@@ -91,7 +91,7 @@ for test_image in test_images:
 
         # Create rectangle on image
         cv2.rectangle(image_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        face_img = image_copy[y:y + h, h:h + w]
+        face_img = image_copy[y:y + h, x:x + w]
 
         # Create the blob for age and gender detection
         blob = cv2.dnn.blobFromImage(face_img, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
@@ -100,33 +100,33 @@ for test_image in test_images:
         gender_net.setInput(blob)
         gender_preds = gender_net.forward()
         gen_det = gender_list[gender_preds[0].argmax()]
-        print("Gender Pred: " + gen_det)
+        print("Gen Pred       : " + gen_det)
 
         # Get real gender
         real_gen = classifier_gender(test_image[-1])
-        print("Real Gen  : " + real_gen)
+        print("Gen Real       : " + real_gen)
+        print("Gen Confidence : " + str(gender_preds[0]))
 
         # Predict Age
         age_net.setInput(blob)
         age_preds = age_net.forward()
         age: Union[str, List[str]] = age_list[age_preds[0].argmax()]
-        print("Age Range : " + age)
-
-        # Define class
-        age_det = classes_age.get(classifier_age(age))
-        print("Age Class : " + age_det)
+        print("Age Range Pred : " + age)
 
         # Define real age and class
         real_age = test_image[4:6]
-        print("Real Age  : " + real_age)
+        print("Age Real       : " + real_age)
+
+        # Define class
+        age_det = classes_age.get(classifier_age(age))
+        print("Age Class Pred : " + age_det)
 
         # Get real age class
         real_age_class = classes_age.get(classifier_age(int(real_age)))
-        print("Real Class: " + real_age_class)
+        print("Age Real Class : " + real_age_class)
 
-        print("Score Age : " + str(age_preds[0]))
-        print("Score Gen : " + str(gender_preds[0]))
-        print('#######################')
+        print("Age Confidence : " + str(age_preds[0]))
+        print('########################################################')
 
         y_pred_age.append(age_det)
         y_test_age.append(real_age_class)
@@ -211,7 +211,7 @@ output_tot = ('TOTAL     : ' + str(correct_age + wrong_age + unrecognized) +
 
 output_age = ('AGE DATA' + '\n' + classification_report(y_test_age, y_pred_age) +
             '\nCORRECT : ' + str(correct_age) +
-            '\nWRONG  : ' + str(wrong_age) +
+            '\nWRONG   : ' + str(wrong_age) +
             '\nTRUE POSITIVES   : ' + str(TruePositive_age) +
             '\nFALSE POSITIVES  : ' + str(FalsePositive_age) +
             '\nFALSE NEGATIVES  : ' + str(FalseNegative_age) +
@@ -220,14 +220,14 @@ output_age = ('AGE DATA' + '\n' + classification_report(y_test_age, y_pred_age) 
 
 output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_gen) +
             '\nCORRECT : ' + str(correct_gen) +
-            '\nWRONG  : ' + str(wrong_gen) +
+            '\nWRONG   : ' + str(wrong_gen) +
             '\nTRUE POSITIVES   : ' + str(TruePositive_gen) +
             '\nFALSE POSITIVES  : ' + str(FalsePositive_gen) +
             '\nFALSE NEGATIVES  : ' + str(FalseNegative_gen) +
             '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
             '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
 
-line = ("________________________________________________________")
+line = ("________________________________________________________\n")
 
 print('\n' + line + output_tot + '\n' + line + output_age + '\n' + line + output_gen + '\n' + line)
 plt.show()
