@@ -13,15 +13,17 @@ wrong_age, correct_age, wrong_gen, correct_gen, unrecognized = 0, 0, 0, 0, 0
 y_test_age, y_pred_age, y_test_gen, y_pred_gen = [], [], [], []
 FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
 FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
-confusion_matrix_age = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+#confusion_matrix_age = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+confusion_matrix_age = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 confusion_matrix_gen = [[0, 0], [0, 0]]
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
-age_class = [10, 50, 100]
+age_class = [12, 32, 50, 100]
 age_list = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 gender_list = ['Male', 'Female']
-classes_age = {1: "Young",
-               2: "Teen",
-               3: "Adult"}
+classes_age = {1: "Junior",
+               2: "Young",
+               3: "Adult",
+               4: "Old"}
 classes_gen = {1: "Male",
                2: "Female"}
 test_images = []
@@ -30,7 +32,7 @@ test_images = []
 dataset_path = 'images/'
 
 # Specify the Haar classifier
-cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
+cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt2.xml')
 
 # Specify font used for plotting
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -47,9 +49,9 @@ def classifier_age(age):
         return 1
     elif max <= age_class[1]:
         return 2
-    #elif max <= age_class[2]:
-    #    return 3
-    return 3
+    elif max <= age_class[2]:
+        return 3
+    return 4
 
 # Return the appropriate string for gender class
 def classifier_gender(gender):
@@ -69,6 +71,7 @@ for i in test_file:
 age_net, gender_net = load_caffe_models()
 for test_image in test_images:
 
+    print('Name Img       : ' + test_image)
     # Create image path
     imagePath = dataset_path + test_image + '.jpg'
     # Read image
@@ -82,6 +85,7 @@ for test_image in test_images:
 
     # Applying the haar classifier to detect faces
     faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
+    print('Detected Faces : ' + str(len(faces_rect)))
 
     if len(faces_rect) == 0:
         unrecognized += 1
@@ -181,14 +185,14 @@ cmarray_gen = np.array(confusion_matrix_gen)
 TruePositive_age = np.diag(cmarray_age)
 TruePositive_gen = np.diag(cmarray_gen)
 
-for i_cm in range(3):
+for i_cm in range(len(classes_age)):
     FalsePositive_age.append(sum(cmarray_age[:, i_cm]) - cmarray_age[i_cm, i_cm])
     FalseNegative_age.append(sum(cmarray_age[i_cm, :]) - cmarray_age[i_cm, i_cm])
     temp = np.delete(cmarray_age, i_cm, 0)  # delete ith row
     temp = np.delete(temp, i_cm, 1)  # delete ith column
     TrueNegative_age.append(sum(sum(temp)))
 
-    if i_cm == 2: break
+    if i_cm == len(classes_gen): break
     FalsePositive_gen.append(sum(cmarray_gen[:, i_cm]) - cmarray_gen[i_cm, i_cm])
     FalseNegative_gen.append(sum(cmarray_gen[i_cm, :]) - cmarray_gen[i_cm, i_cm])
     temp2 = np.delete(cmarray_gen, i_cm, 0)  # delete ith row
@@ -206,6 +210,7 @@ fig_gen, ax_gen = plot_confusion_matrix(conf_mat=cmarray_gen,
                                 class_names=classes_gen.items())
 
 # Print results
+
 output_tot = ('TOTAL     : ' + str(correct_age + wrong_age + unrecognized) +
             '\nNO FACE   : ' + str(unrecognized))
 

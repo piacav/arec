@@ -65,11 +65,7 @@ def rect_create (faces_rect):
     for (x, y, w, h) in faces_rect:
         # Create rectangle on image
         cv2.rectangle(image_copy, (x, y), (x + w, y + h), (0, 0, 255), 1)
-        a = y + 1
-        b = (y + h)-1
-        c = x + 1
-        d = (x + w)-1
-        face_img = image_copy[a:b, c:d]
+        face_img = image_copy[y:y + h, x:x + w]
     return face_img
 
 # Function to calculate the class of age
@@ -117,6 +113,7 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
         faces_rect = cascade.detectMultiScale(gray_image, 1.1, 5)
 
         if len(faces_rect) == 0:
+            unrecognized +=1
             continue
 
         # Plot gray image and wait
@@ -124,14 +121,14 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
         #cv2.waitKey(0)
 
         # Resize cropped image
-        im = resizeImage(rect_create(faces_rect))
+        res_im = resizeImage(rect_create(faces_rect))
 
         # Plot gray image and wait
         #cv2.imshow("Image", im)
         #cv2.waitKey(0)
 
         # Uniform LBP is used
-        lbp = local_binary_pattern(im, no_points, radius, method='uniform')
+        lbp = local_binary_pattern(res_im, no_points, radius, method='uniform')
         # Plot lbp
         #cv2.imshow("LBP", lbp.astype("uint8"))
         #cv2.waitKey(0)
@@ -159,6 +156,7 @@ if not path.exists("lbp_model_age.pkl") or not path.exists("lbp_model_gen.pkl"):
                     conchist = hist
                 else:
                     conchist = np.append(conchist, hist)
+
         # normalize the histogram
         conchist = conchist.astype("float")
         conchist /= (conchist.sum() + 1e-7)
@@ -216,17 +214,16 @@ for i in test_images:
         continue
 
     # Resize cropped image
-    im = resizeImage(rect_create(faces_rect))
+    res_im = resizeImage(rect_create(faces_rect))
 
     # Plot gray image and wait
     #cv2.imshow("Image", im)
     #cv2.waitKey(0)
 
     # LBP algorithm
-    lbp = local_binary_pattern(im, no_points, radius, method='uniform')
+    lbp = local_binary_pattern(res_im, no_points, radius, method='uniform')
     # Plot lbp
     cv2.imshow("LBP", lbp.astype("uint8"))
-    cv2.waitKey(0)
 
     # Plot histogram
     # ax.hist(lbp.ravel(), density=True, bins=20, range=(0, 256))
