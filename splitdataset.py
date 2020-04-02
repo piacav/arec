@@ -31,7 +31,7 @@ for file in os.listdir(dataset_path):
         eta = int(file[4:6])
         if eta <= 10:
             dataset_dict_age[1].append(file[:-4])
-        elif eta <= 50:
+        elif eta <= 40:
             dataset_dict_age[2].append(file[:-4])
         else:
             dataset_dict_age[3].append(file[:-4])

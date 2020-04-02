@@ -18,10 +18,10 @@ y_test_age, y_pred_age, y_test_gen, y_pred_gen = \
 FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
 FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
 age_param = [10, 40, 100]
-divisions = 8
-classes_age = {1: "Children",
-               2: "Young",
-               3: "Adult"}
+divisions = 3 #gread size divisions x divisions
+classes_age = {1: "Young",
+               2: "Adult",
+               3: "Old"}
 classes_gen = {1: "Male",
                2: "Female"}
 confusion_matrix_age = [[0, 0, 0],
@@ -379,7 +379,7 @@ output_gen = ('GENDER DATA' + '\n' + classification_report(y_test_gen, y_pred_ge
             '\nTRUE NEGATIVES   : ' + str(TrueNegative_gen) +
             '\nCONFUSION MATRIX :\n' + str(cmarray_gen))
 
-line = ("________________________________________________________")
+line = ("________________________________________________________\n")
 
 print('\n' + line + output_tot + '\n' + line + output_age + '\n' + line + output_gen + '\n' + line)
 plt.show()
