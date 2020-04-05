@@ -29,7 +29,7 @@ for m in range(1, 3):
 for file in os.listdir(dataset_path):
     if not file.startswith('.'):
         eta = int(file[4:6])
-        if eta <= 15:
+        if eta <= 10:
             dataset_dict_age[1].append(file[:-4])
         elif eta <= 30:
             dataset_dict_age[2].append(file[:-4])
