@@ -1,11 +1,10 @@
 import splitdataset
 import lbp3
-'''
+
 age_params = [[12, 50, 100],
               [15, 30, 100],
               [10, 30, 100]]
-'''
-age_params = [[12, 50, 100]]
+
 perc = 0.70
 divisions = [3, 8, 9]
 classifiers = ['/haarcascade_frontalface_alt.xml', '/haarcascade_frontalface_alt2.xml', '/haarcascade_frontalface_default.xml']
