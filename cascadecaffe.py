@@ -13,17 +13,16 @@ wrong_age, correct_age, wrong_gen, correct_gen, unrecognized = 0, 0, 0, 0, 0
 y_test_age, y_pred_age, y_test_gen, y_pred_gen = [], [], [], []
 FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
 FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
-#confusion_matrix_age = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-confusion_matrix_age = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+confusion_matrix_age = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+#confusion_matrix_age = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 confusion_matrix_gen = [[0, 0], [0, 0]]
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
-age_class = [12, 32, 50, 100]
+age_class = [15, 30, 100]
 age_list = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 gender_list = ['Male', 'Female']
-classes_age = {1: "Junior",
-               2: "Young",
-               3: "Adult",
-               4: "Old"}
+classes_age = {1: "Young",
+               2: "Adult",
+               3: "Old"}
 classes_gen = {1: "Male",
                2: "Female"}
 test_images = []
@@ -32,7 +31,7 @@ test_images = []
 dataset_path = 'images/'
 
 # Specify the Haar classifier
-cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt2.xml')
+cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_default.xml')
 
 # Specify font used for plotting
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -49,9 +48,7 @@ def classifier_age(age):
         return 1
     elif max <= age_class[1]:
         return 2
-    elif max <= age_class[2]:
-        return 3
-    return 4
+    return 3
 
 # Return the appropriate string for gender class
 def classifier_gender(gender):

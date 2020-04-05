@@ -17,11 +17,11 @@ y_test_age, y_pred_age, y_test_gen, y_pred_gen = \
     [], [], [], [], [], [], [], [], [], [], []
 FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
 FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
-age_param = [10, 40, 100]
-divisions = 3 #gread size divisions x divisions
-classes_age = {1: "Young",
-               2: "Adult",
-               3: "Old"}
+age_param = [15, 30, 100]
+divisions = 8 #gread size divisions x divisions
+classes_age = {1: "Junior",
+               2: "Young",
+               3: "Adult"}
 classes_gen = {1: "Male",
                2: "Female"}
 confusion_matrix_age = [[0, 0, 0],
@@ -38,7 +38,7 @@ radius = 5
 no_points = 5 * radius
 
 # Specify the Haar classifier
-cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_alt.xml')
+cascade = cv2.CascadeClassifier(cv2.data.haarcascades + '/haarcascade_frontalface_default.xml')
 
 # Constuct the figure for histogram
 #plt.style.use("ggplot")
