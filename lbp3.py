@@ -18,7 +18,7 @@ y_test_age, y_pred_age, y_test_gen, y_pred_gen = \
 FalsePositive_age, FalseNegative_age, TrueNegative_age = [], [], []
 FalsePositive_gen, FalseNegative_gen, TrueNegative_gen = [], [], []
 age_param = [10, 30, 100]
-divisions = 8 #grid size divisions x divisions
+divisions = 9 #grid size divisions x divisions
 classes_age = {1: "Junior",
                2: "Young",
                3: "Adult"}
